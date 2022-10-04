@@ -1,10 +1,11 @@
 from pyexpat.errors import messages
+from unittest import result
 import discord
 from discord.ext import commands
 import json
-
-secret = json.load(open("secret.json"))
-token = secret["dcToken"]
+import firebase_admin
+from firebase_admin import credentials
+from google.cloud import firestore
 
 Bot = commands.Bot("!Przvl ", intents=discord.Intents.all())
 
@@ -13,7 +14,40 @@ async def on_ready():
     print("Merhaba ben Parzival ve hazırım")
 
 @Bot.command()
-async def sayHi(msg):
-    await msg.send("Merhaba ben Parzival")
+async def labAcikMi(msg):
+    await msg.send(labOpenStr(getLatestLabOpen()))
 
-Bot.run(token)
+def botRun():
+    secret = json.load(open("secrets\secret.json"))
+    token = secret["dcToken"]
+    Bot.run(token)
+
+def initializeFirebase():
+    privateKeyPath = "secrets\mvrg-app-firebase-adminsdk-w1hjg-dd8c97de87.json"
+    cred = credentials.Certificate(privateKeyPath)
+    return firebase_admin.initialize_app()
+    
+def getLatestLabOpen():
+    docs = firestore.Client().collection(u"LabOpen").order_by(u"time", direction=firestore.Query.DESCENDING).limit(1).stream()
+    for doc in docs:
+        return doc.to_dict()
+    
+def convertTimeToStr(time):
+    return f"{time.day}.{time.month}.{time.year} {time.hour}:{time.minute}"
+
+def labOpenStr(labOpen):
+    name = labOpen["userName"]
+    timeStr = convertTimeToStr(labOpen["time"])
+    acikMi = labOpen["acikMi"]
+    if acikMi:
+        emo = "✅"
+        acik = "açıldı"
+    else:
+        emo = "❌"
+        acik = "kapandı"
+    return f"Lab {name} tarafından {timeStr} de {acik} {emo}"
+    
+if __name__ == "__main__":
+    initializeFirebase()
+    botRun()
+    
