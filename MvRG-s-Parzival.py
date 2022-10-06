@@ -23,8 +23,6 @@ def botRun():
     Bot.run(token)
 
 def initializeFirebase():
-    privateKeyPath = "secrets\mvrg-app-firebase-adminsdk-w1hjg-dd8c97de87.json"
-    cred = credentials.Certificate(privateKeyPath)
     return firebase_admin.initialize_app()
     
 def getLatestLabOpen():
