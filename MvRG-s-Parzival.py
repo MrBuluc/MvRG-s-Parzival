@@ -18,7 +18,7 @@ async def labAcikMi(msg):
     await msg.send(labOpenStr(getLatestLabOpen()))
 
 def botRun():
-    secret = json.load(open("secrets\secret.json"))
+    secret = json.load(open("secret.json"))
     token = secret["dcToken"]
     Bot.run(token)
 
@@ -31,7 +31,7 @@ def getLatestLabOpen():
         return doc.to_dict()
     
 def convertTimeToStr(time):
-    return f"{time.day}.{time.month}.{time.year} {time.hour}:{time.minute}"
+    return f"{time.day}.{time.month}.{time.year} {time.hour + 3}:{time.minute}"
 
 def labOpenStr(labOpen):
     name = labOpen["userName"]
